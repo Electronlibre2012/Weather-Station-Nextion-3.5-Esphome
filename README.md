@@ -6,3 +6,7 @@ Paradis Artificiels (Romain) in French! (tuto #18 : https://www.youtube.com/watc
 New project complete : (tuto #20) : https://www.youtube.com/watch?v=I-w90TQwgCo&t=180s
 
 Thanks to Romain who make those nice vidéos.
+
+A link to my thingverse page for the STL files : https://www.thingiverse.com/thing:3862088
+
+Enjoy ;)
