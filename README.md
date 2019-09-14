@@ -11,4 +11,3 @@ A link to my thingverse page for the STL files : https://www.thingiverse.com/thi
 
 Enjoy ;)
 
-20190915_024142.jpg
