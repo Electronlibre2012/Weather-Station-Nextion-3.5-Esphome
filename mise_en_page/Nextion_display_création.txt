@@ -1,0 +1,241 @@
+esphome:
+  name: station_nextion
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: "ELECTRONLIBRE"
+  password: "shryfluhutdamojacok7"
+  manual_ip:
+    static_ip: 192.168.1.30
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
+
+api:
+
+ota: 
+  password: "Popol9744"
+
+logger:
+  baud_rate: 0     # Disable UART logging (pins GPIO1/3 are used for Nextion communication)
+  
+uart:
+  rx_pin: D1
+  tx_pin: D6
+  baud_rate: 9600
+  
+time:
+  - platform: sntp
+    id: sntp_time
+    
+sensor:
+  - platform: homeassistant   # Cpu temperature
+    id: temp_cpu
+    entity_id: sensor.cpu_temp
+  - platform: homeassistant   # Outside temperature
+    id: temp_outside    
+    entity_id: sensor.weather_temperature
+  - platform: homeassistant   # CPU Use
+    id: cpu_use
+    entity_id: sensor.processor_use
+  - platform: homeassistant   # Ram Use
+    id: ram_use
+    entity_id: sensor.memory_use_percent
+  - platform: homeassistant   # Disk Use
+    id: disk_use
+    entity_id: sensor.disk_use_percent_home
+  - platform: homeassistant   # Conso prise à venir
+    id: conso_actuelle
+    entity_id: sensor.weather_symbol
+  - platform: homeassistant   # Forecast icon
+    id: today_icon
+    entity_id: sensor.today_icon
+
+text_sensor:
+  - platform: homeassistant
+    id: date_simple
+    entity_id: sensor.date_simple
+    internal: true
+  - platform: homeassistant 
+    id: uptime_ha
+    entity_id: sensor.uptime_ha 
+    internal: true
+            
+binary_sensor:
+  - platform: homeassistant
+    id: somebody_home
+    entity_id: binary_sensor.somebody_home
+  - platform: nextion
+    page_id: 0
+    component_id: 15
+    id: reboot
+    on_press:
+      then:
+        - homeassistant.service:
+            service: script.reboot_ha
+  - platform: nextion
+    page_id: 1
+    component_id: 2
+    id: led_salon
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_48dc_2
+  - platform: nextion
+    page_id: 1
+    component_id: 3
+    id: led_salon_e
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_4204
+  - platform: nextion
+    page_id: 1
+    component_id: 4
+    id: led_cuisine
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_78e0
+  - platform: nextion
+    page_id: 1
+    component_id: 5
+    id: led_terrasse
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_7869_2
+  - platform: nextion
+    page_id: 1
+    component_id: 6
+    id: led_garage
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_af11_2
+  - platform: nextion
+    page_id: 1
+    component_id: 7
+    id: led_couloir
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_ac06
+  - platform: nextion
+    page_id: 1
+    component_id: 8
+    id: led_wc_haut
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.lightbulb_09c8
+  - platform: nextion
+    page_id: 1
+    component_id: 9
+    id: led_wc_bas
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data: 
+              entity_id: light.0x00158d0003996317_light           
+  - platform: nextion
+    page_id: 1
+    component_id: 10
+    id: led_hub_cui
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.aqara_hub_3710_2             
+  - platform: nextion
+    page_id: 1
+    component_id: 11
+    id: led_hub_sal
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.gateway_light_7811dcfb2b35            
+  - platform: nextion
+    page_id: 1
+    component_id: 12
+    id: led_hub_coul
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.aqara_hub_4596  
+  - platform: nextion
+    page_id: 1
+    component_id: 13
+    id: led_hub_ch2
+    on_press:
+      then:
+        - homeassistant.service:
+            service: light.toggle
+            data:
+              entity_id: light.gateway_light_7811dcfb1c9f            
+            
+globals:
+ - id: first_page             # First page of the display?
+   type: bool
+   restore_value: no
+ - id: display_on             # Is display on?
+   type: bool
+   restore_value: no
+   
+display:
+  - platform: nextion
+    id: teplomer
+    update_interval: 5s
+    lambda: |-
+      if (id(nextion_page_id) == 0) {  
+        if (id(somebody_home).state) {
+        if (!id(display_on)) {
+          it.set_backlight_brightness(50);
+          id(display_on)=true;
+        }
+      it.send_command_printf("%s.pic=%.0f", "meteo_icon",id(today_icon).state);
+      auto time = id(sntp_time).now();
+      it.set_component_text("page_nbr", "Page 2");
+      it.set_component_text_printf("heure","%02d",time.hour);
+      it.set_component_text_printf("minute","%02d",time.minute);
+      it.set_component_text_printf("temp_cpu","%.0f",id(temp_cpu).state);
+      it.set_component_text_printf("meteo","%2.1f",id(temp_outside).state);
+      it.set_component_text_printf("cpu","%2.0f",id(cpu_use).state);
+      it.set_component_text_printf("ram","%.0f",id(ram_use).state);
+      it.set_component_text_printf("disk","%.0f",id(disk_use).state);
+      it.set_component_text_printf("conso","%4.0f",id(conso_actuelle).state);
+      it.set_component_text_printf("uptime","EN LIGNE DEPUIS %s ",id(uptime_ha).state.c_str());
+      it.set_component_text_printf("date","%s",id(date_simple).state.c_str());
+      } else {
+        if (id(display_on)) {
+          it.set_backlight_brightness(0);
+          id(display_on)=false;
+        }
+      }
+      } else if (id(nextion_page_id) == 1) {
+        it.set_component_text("page_nbr", "Page 2");
+      }
+      
+      
+      
+      
